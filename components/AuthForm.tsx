@@ -18,6 +18,7 @@ import { z } from "zod";
 import Image from "next/image";
 import Link from "next/link";
 import { createAccount } from "@/lib/actions/user.actions";
+import OTPModal from  "@/components/OTPModal";
 
 type Formtype = "sign-in" | "sign-up";
 
@@ -152,7 +153,9 @@ const AuthForm = ({ type }: { type: Formtype }) => {
         </form>
       </Form>
 
-      {/* otp */}
+      {accountId && (
+        <OTPModal email={form.getValues("email")} accountId={accountId} />
+      )}
     </>
   );
 };
