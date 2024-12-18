@@ -24,6 +24,8 @@ import Link from "next/link";
 import { constructDownloadUrl } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import { deleteFile, renameFile } from "@/lib/actions/file.actions";
+import { FileDetails } from "./ActionsModalContent";
 
 const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -43,6 +45,26 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     //   setEmails([]);
   };
 
+  const handleAction = async () => {
+    if (!action) return;
+    setIsLoading(true);
+    let success = false;
+
+    const actions = {
+      rename: () =>
+        renameFile({ fileId: file.$id, name, extension: file.extension, path }),
+
+      delete: () =>
+        deleteFile({ fileId: file.$id, bucketFileId: file.bucketFileId, path }),
+    };
+
+    success = await actions[action.value as keyof typeof actions]();
+
+    if (success) closeAllModals();
+
+    setIsLoading(false);
+  };
+
   const renderDialogContent = () => {
     if (!action) return null;
 
@@ -60,7 +82,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
               onChange={(e) => setName(e.target.value)}
             />
           )}
-
+          {value === "details" && <FileDetails file={file} />}
           {value === "delete" && (
             <p className="delete-confirmation">
               Are you sure you want to delete{` `}
@@ -74,7 +96,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
               Cancel
             </Button>
 
-            <Button onClick={() => {}} className="modal-submit-button">
+            <Button onClick={handleAction} className="modal-submit-button">
               <p className="capitalize">{value}</p>
               {isLoading && (
                 <Image
